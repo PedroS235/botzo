@@ -7,10 +7,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
+#include "drivers/i2c.h"
 #include "drivers/pca9685/registers.h"
 #include "error.h"
 #include "hardware/i2c.h"
@@ -38,57 +38,6 @@ typedef struct {
 
 static PCA9685_t driver = {0};
 
-static ErrorCode_e read_register(const uint8_t reg, uint8_t *dest, const size_t len) {
-    assert(dest != NULL);
-    assert(len > 0U);
-    assert(len <= PCA9685_MAX_DATA_BYTES);
-
-    if (dest == NULL) {
-        return ERR_INVALID_PARAM;
-    }
-    if (len == 0U) {
-        return ERR_INVALID_PARAM;
-    }
-
-    int ret = i2c_write_blocking(driver.i2c, driver.addr, &reg, 1, true);
-    if ((ret == PICO_ERROR_GENERIC) || (ret != 1)) {
-        return ERR_I2C_ERROR;
-    }
-
-    ret = i2c_read_blocking(driver.i2c, driver.addr, dest, len, false);
-    if ((ret == PICO_ERROR_GENERIC) || (ret != (int)len)) {
-        return ERR_I2C_ERROR;
-    }
-
-    return OK;
-}
-
-static ErrorCode_e write_register(const uint8_t reg,
-                                  const uint8_t *data,
-                                  const size_t len) {
-    assert(data != NULL);
-    assert(len > 0U);
-    assert(len <= PCA9685_MAX_DATA_BYTES);
-
-    if (data == NULL) {
-        return ERR_INVALID_PARAM;
-    }
-    if (len == 0U) {
-        return ERR_INVALID_PARAM;
-    }
-
-    uint8_t buf[PCA9685_MAX_I2C_WRITE_SIZE];
-    buf[0] = reg;
-    (void)memcpy(&buf[1], data, len);
-
-    int ret = i2c_write_blocking(driver.i2c, driver.addr, buf, len + 1U, false);
-    if ((ret == PICO_ERROR_GENERIC) || (ret != (int)(len + 1U))) {
-        return ERR_I2C_ERROR;
-    }
-
-    return OK;
-}
-
 static ErrorCode_e read_register8(uint8_t reg, uint8_t *dest) {
     assert(dest != NULL);
 
@@ -96,28 +45,17 @@ static ErrorCode_e read_register8(uint8_t reg, uint8_t *dest) {
         return ERR_INVALID_PARAM;
     }
 
-    return read_register(reg, dest, 1U);
+    return read_register(driver.i2c, driver.addr, reg, dest, 1U);
 }
 
 static ErrorCode_e write_register8(uint8_t reg, uint8_t data) {
-    return write_register(reg, &data, 1U);
+    return write_register(driver.i2c, driver.addr, reg, &data, 1U);
 }
 
 ErrorCode_e pca9685_init(i2c_inst_t *i2c, uint8_t addr, const PCA9685Config_s *config) {
-    assert(i2c != NULL);
-    assert(config != NULL);
-    assert(addr <= 0x7FU);
-
-    if (i2c == NULL) {
-        return ERR_INVALID_PARAM;
-    }
-    if (config == NULL) {
-        return ERR_INVALID_PARAM;
-    }
-
-    if (driver.initialized) {
-        return ERR_DRIVER_ALREADY_INITIALIZED;
-    }
+    if (i2c == NULL) return ERR_INVALID_PARAM;
+    if (config == NULL) return ERR_INVALID_PARAM;
+    if (driver.initialized) return ERR_DRIVER_ALREADY_INITIALIZED;
 
     driver.config = config;
     driver.addr = addr;
@@ -350,7 +288,7 @@ ErrorCode_e pca9685_set_pwm(uint8_t idx, uint16_t on, uint16_t off) {
     buf[2] = (uint8_t)(off);
     buf[3] = (uint8_t)(off >> 8U);
 
-    return write_register(reg, buf, 4);
+    return write_register(driver.i2c, driver.addr, reg, buf, 4);
 }
 
 ErrorCode_e pca9685_set_pin(uint8_t idx) {
