@@ -10,6 +10,7 @@ typedef enum ErrorCode_e {
     ERR_SENSOR_NOT_CONNECTED = -5,
     ERR_INVALID_PARAM = -6,
     ERR_DRIVER_ALREADY_INITIALIZED = -7,
+    ERR_SCHEDULER_MAX_TASKS_REACHED = -8,
 } ErrorCode_e;
 
 #endif  // !ERRORS_H

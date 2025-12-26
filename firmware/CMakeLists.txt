@@ -16,6 +16,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 set(SOURCES 
     src/drivers/pca9685.c
+    src/drivers/mpu60x0.c
+    src/scheduler.c
 )
 
 add_executable(firmware src/main.c ${SOURCES})
