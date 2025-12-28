@@ -18,6 +18,7 @@ set(SOURCES
     src/drivers/pca9685.c
     src/drivers/mpu60x0.c
     src/scheduler.c
+    src/servo_mgr.c
 )
 
 add_executable(firmware src/main.c ${SOURCES})
@@ -26,7 +27,7 @@ pico_enable_stdio_usb(firmware 1)
 pico_enable_stdio_uart(firmware 1)
 pico_add_extra_outputs(firmware)
 
-target_link_libraries(firmware pico_stdlib hardware_i2c)
+target_link_libraries(firmware pico_stdlib hardware_i2c pico_status_led hardware_irq)
 target_compile_definitions(firmware PRIVATE
     PICO_DEFAULT_I2C_SDA_PIN=12
     PICO_DEFAULT_I2C_SCL_PIN=13

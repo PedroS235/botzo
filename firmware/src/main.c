@@ -1,4 +1,5 @@
 #include <pico/time.h>
+#include <pico/types.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -9,6 +10,7 @@
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 #include "scheduler.h"
+#include "servo_mgr.h"
 
 uint8_t led_state = false;
 uint16_t servo_angle = 0;
@@ -42,14 +44,23 @@ void activity_led(void) {
 void toggle_led() {
     gpio_put(26, led_state);
     led_state = !led_state;
-    printf("Toggle led\n");
 }
 
+volatile absolute_time_t last_time = 0;
+
 void move_servo() {
-    if (!led_state)
-        pca9685_set_pwm(1, 0, 4096);
-    else
-        pca9685_set_pwm(1, 4096, 0);
+    static int angle = 0;
+    printf("Angle: %d\n", angle);
+    servo_mgr_move_to(0, angle);
+    angle = (angle + 45) % 270;
+
+    // static uint16_t pulse = 350;
+    // if (get_absolute_time() - last_time >= 250000) {
+    //     printf("Current pulse width: %u\n", pulse);
+    //     servo_mgr_move_pulse(0, pulse);
+    //     pulse = (pulse + 10) % 2800;
+    //     last_time = get_absolute_time();
+    // }
 }
 
 float temp;
@@ -87,16 +98,19 @@ int main() {
     bi_decl(bi_2pins_with_func(
         PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 
-    uint8_t ret;
-    PCA9685Config_s config = {.freq = 50};
-    pca9685_init(i2c_default, PCA9685_DEFAULT_I2C_ADDRESS, &config);
     mpu60x0_init(i2c_default, MPU60X0_DEFAULT_I2C_ADDRESS, &MPU60X0_DEFAULT_CONFIG);
+    servo_mgr_init(i2c_default, PCA9685_DEFAULT_I2C_ADDRESS);
 
     scheduler_add_task(1000, 1, toggle_led);
-    scheduler_add_task(1000, 1, move_servo);
+    scheduler_add_task(2000, 1, move_servo);
     scheduler_add_task(10, 5, read_imu);
     scheduler_add_task(50, 2, activity_led);
-    scheduler_add_task(500, 1, status_task);
+    // scheduler_add_task(500, 1, status_task);
+
+    sleep_ms(5000);
+    printf("Starting auto calibration\n");
+
+    pca9685_auto_calibrate_osc_blocking_ex(3, 0, 500000);
 
     while (1) {
         scheduler_run();
