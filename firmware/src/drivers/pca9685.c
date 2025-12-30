@@ -221,6 +221,26 @@ ErrorCode_e pca9685_get_frequency(uint8_t *freq) {
     return OK;
 }
 
+ErrorCode_e pca9685_get_us_per_count(float *us_per_count) {
+    assert(us_per_count != NULL);
+
+    if (!driver.initialized) {
+        return ERR_DRIVER_NOT_INITIALIZED;
+    }
+
+    uint8_t prescale = 0U;
+    ErrorCode_e err = pca9685_get_prescale(&prescale);
+    if (err != OK) {
+        return err;
+    }
+
+    // Calculate microseconds per counter tick
+    // pulselength = 1000000 * (prescale + 1) / oscclock
+    *us_per_count = 1000000.0f * (prescale + 1U) / driver.oscclock;
+
+    return OK;
+}
+
 ErrorCode_e pca9685_set_frequency(float freq) {
     assert(freq > 0.0F);
 

@@ -73,6 +73,17 @@ ErrorCode_e pca9685_get_prescale(uint8_t *prescale);
 ErrorCode_e pca9685_get_frequency(uint8_t *kreq);
 
 /**
+ * @brief Get microseconds per counter tick
+ *
+ * Calculates the precise timing per 12-bit counter tick based on actual
+ * prescale value and oscillator frequency (after auto-calibration)
+ *
+ * @param us_per_count Output microseconds per count
+ * @return ErrorCode_e OK on success, error code otherwise
+ */
+ErrorCode_e pca9685_get_us_per_count(float *us_per_count);
+
+/**
  * @brief Set prescale value
  *
  * Device must be in sleep mode before calling this function

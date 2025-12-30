@@ -14,11 +14,11 @@ pico_sdk_init()
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-set(SOURCES 
+set(SOURCES
     src/drivers/pca9685.c
     src/drivers/mpu60x0.c
     src/scheduler.c
-    src/servo_mgr.c
+    src/servo.c
 )
 
 add_executable(firmware src/main.c ${SOURCES})

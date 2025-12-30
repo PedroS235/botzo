@@ -1,3 +1,4 @@
+#include <math.h>
 #include <pico/time.h>
 #include <pico/types.h>
 #include <stdint.h>
@@ -10,10 +11,10 @@
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 #include "scheduler.h"
-#include "servo_mgr.h"
+#include "servo.h"
 
 uint8_t led_state = false;
-uint16_t servo_angle = 0;
+servo_t test_servo;
 
 typedef struct {
     uint32_t duration_ms;
@@ -48,19 +49,30 @@ void toggle_led() {
 
 volatile absolute_time_t last_time = 0;
 
-void move_servo() {
-    static int angle = 0;
-    printf("Angle: %d\n", angle);
-    servo_mgr_move_to(0, angle);
-    angle = (angle + 45) % 270;
+void servo_update_task(void) { servo_update(&test_servo); }
 
-    // static uint16_t pulse = 350;
-    // if (get_absolute_time() - last_time >= 250000) {
-    //     printf("Current pulse width: %u\n", pulse);
-    //     servo_mgr_move_pulse(0, pulse);
-    //     pulse = (pulse + 10) % 2800;
-    //     last_time = get_absolute_time();
-    // }
+void test_servo_movement(void) {
+    static uint64_t start_time = 0;
+
+    if (start_time == 0) {
+        start_time = time_us_64();
+    }
+
+    // Calculate elapsed time in seconds
+    float elapsed_sec = (time_us_64() - start_time) / 1000000.0f;
+
+    // Sine wave: period = 4 seconds, oscillates between 0° and 180°
+    float angle = 90.0f + 90.0f * sinf(2.0f * 3.14159f * elapsed_sec / 10.0f);
+
+    float current_angle;
+    servo_get_angle(&test_servo, &current_angle);
+
+    printf("t=%.2fs | Target: %.1f° | Current: %.1f°\n",
+           elapsed_sec,
+           angle,
+           current_angle);
+
+    servo_set_target(&test_servo, angle, 150);  // 150ms smooth transition
 }
 
 float temp;
@@ -99,18 +111,45 @@ int main() {
         PICO_DEFAULT_I2C_SDA_PIN, PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C));
 
     mpu60x0_init(i2c_default, MPU60X0_DEFAULT_I2C_ADDRESS, &MPU60X0_DEFAULT_CONFIG);
-    servo_mgr_init(i2c_default, PCA9685_DEFAULT_I2C_ADDRESS);
 
-    scheduler_add_task(1000, 1, toggle_led);
-    scheduler_add_task(2000, 1, move_servo);
+    // Initialize PCA9685
+    PCA9685Config_t pca_config = {.freq = 50};
+    pca9685_init(i2c_default, PCA9685_DEFAULT_I2C_ADDRESS, &pca_config);
+
+    printf("Starting PCA9685 auto calibration\n");
+    pca9685_auto_calibrate_osc_blocking_ex(3, 0, 500000);
+
+    // Initialize test servo on channel 0
+    // Calibration converted from μs to counter units (at 50Hz ≈ 4.88μs/count)
+    // Original μs calibration: a=0.0, b=7.378, c=616.0
+    // Counter calibration: divide by ~4.88
+    servo_config_t servo_config = {.channel = 0,
+                                   .calib = {.a = 0.00053f, .b = 1.686f, .c = 72.0f},
+                                   .min_angle = 0.0f,
+                                   .max_angle = 270.0f,
+                                   .min_count = 72,    // 500μs ≈ 102 counts
+                                   .max_count = 553};  // 2500μs ≈ 512 counts
+    servo_init(&test_servo, &servo_config);
+
+    printf("\n=== Servo Test Initialized ===\n");
+    printf("Channel: 0\n");
+    printf("Calibration (counter): a=%.3f, b=%.3f, c=%.1f\n",
+           servo_config.calib.a,
+           servo_config.calib.b,
+           servo_config.calib.c);
+    printf("Range: %.0f° - %.0f° (counts: %u - %u)\n",
+           servo_config.min_angle,
+           servo_config.max_angle,
+           servo_config.min_count,
+           servo_config.max_count);
+    printf("PCA9685 precision: %.4f μs/count\n\n", test_servo.us_per_count);
+
+    // scheduler_add_task(1000, 1, toggle_led);
+    scheduler_add_task(100, 3, test_servo_movement);  // Update sine wave every 100ms
+    scheduler_add_task(10, 5, servo_update_task);     // Update servo at 10ms (100Hz)
     scheduler_add_task(10, 5, read_imu);
     scheduler_add_task(50, 2, activity_led);
-    // scheduler_add_task(500, 1, status_task);
-
-    sleep_ms(5000);
-    printf("Starting auto calibration\n");
-
-    pca9685_auto_calibrate_osc_blocking_ex(3, 0, 500000);
+    scheduler_add_task(500, 1, status_task);
 
     while (1) {
         scheduler_run();
