@@ -11,7 +11,7 @@
 #include "error.h"
 
 ErrorCode_e servo_init(servo_t *servo, const servo_config_t *config) {
-    if (!servo) return ERR_INVALID_PARAM;
+    if (servo == NULL) return ERR_INVALID_PARAM;
 
     servo->channel = config->channel;
     servo->min_angle = config->min_angle;
@@ -41,7 +41,7 @@ ErrorCode_e servo_init(servo_t *servo, const servo_config_t *config) {
 }
 
 ErrorCode_e servo_set_target(servo_t *servo, float angle, uint32_t duration_ms) {
-    if (!servo || !servo->initialized || angle > servo->max_angle ||
+    if (servo == NULL || !servo->initialized || angle > servo->max_angle ||
         angle < servo->min_angle)
         return ERR_INVALID_PARAM;
 
@@ -55,14 +55,14 @@ ErrorCode_e servo_set_target(servo_t *servo, float angle, uint32_t duration_ms) 
 
     servo->start_angle = servo->current_angle;
     servo->interp_duration_us = duration_ms * 1000;
-    servo->interp_start_us = get_absolute_time();
+    servo->interp_start_us = time_us_64();
     servo->state = SERVO_STATE_MOVING;
 
     return OK;
 }
 
 ErrorCode_e servo_update(servo_t *servo) {
-    if (!servo || !servo->initialized) return ERR_INVALID_PARAM;
+    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
 
     if (servo->state != SERVO_STATE_MOVING) return OK;
 
@@ -88,27 +88,27 @@ ErrorCode_e servo_update(servo_t *servo) {
 }
 
 ErrorCode_e servo_angle_to_count(const servo_t *servo, float angle, uint16_t *count) {
-    if (!servo || !servo->initialized) return ERR_INVALID_PARAM;
+    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
 
     // Apply quadratic calibration: count = a*angle² + b*angle + c
     float count_float =
         servo->calib.a * angle * angle + servo->calib.b * angle + servo->calib.c;
 
     // Round and clamp to counter limits
-    *count = MAX(MIN((uint16_t)(count_float + 0.5f), servo->max_count),
-                 servo->min_count);
+    *count =
+        MAX(MIN((uint16_t)(count_float + 0.5f), servo->max_count), servo->min_count);
 
     return OK;
 }
 
 ErrorCode_e servo_is_moving(const servo_t *servo) {
-    if (!servo || !servo->initialized) return ERR_INVALID_PARAM;
+    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
 
     return servo->state == SERVO_STATE_MOVING ? OK : ERR_ERROR;
 }
 
 ErrorCode_e servo_stop(servo_t *servo) {
-    if (!servo || !servo->initialized) return ERR_INVALID_PARAM;
+    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
 
     if (servo->state == SERVO_STATE_MOVING) {
         servo->interp_start_us = 0;
@@ -120,14 +120,28 @@ ErrorCode_e servo_stop(servo_t *servo) {
 }
 
 ErrorCode_e servo_set_count_direct(servo_t *servo, uint16_t count) {
-    if (!servo || !servo->initialized) return ERR_INVALID_PARAM;
+    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
 
     servo->current_count = count;
     return pca9685_set_pwm(servo->channel, 0, count);
 }
 
 ErrorCode_e servo_set_pulse_direct(servo_t *servo, uint16_t pulse_us) {
-    if (!servo || !servo->initialized) return ERR_INVALID_PARAM;
+    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
 
     return pca9685_set_pulse_width(servo->channel, pulse_us);
+}
+
+uint16_t servo_pulse_to_count(const servo_t *servo, uint16_t pulse_us) {
+    return (uint16_t)(pulse_us / servo->us_per_count + 0.5f);
+}
+
+uint16_t servo_count_to_pulse(const servo_t *servo, uint16_t count) {
+    return (uint16_t)(count * servo->us_per_count + 0.5f);
+}
+
+ErrorCode_e servo_get_angle(const servo_t *servo, float *angle) {
+    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
+    *angle = servo->current_angle;
+    return OK;
 }

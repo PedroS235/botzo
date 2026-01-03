@@ -51,17 +51,8 @@ ErrorCode_e servo_set_count_direct(servo_t *servo, uint16_t count);
 ErrorCode_e servo_set_pulse_direct(servo_t *servo, uint16_t pulse_us);
 
 // Conversion helpers
-inline uint16_t servo_pulse_to_count(const servo_t *servo, uint16_t pulse_us) {
-    return (uint16_t)(pulse_us / servo->us_per_count + 0.5f);
-}
-inline uint16_t servo_count_to_pulse(const servo_t *servo, uint16_t count) {
-    return (uint16_t)(count * servo->us_per_count + 0.5f);
-}
-
-inline ErrorCode_e servo_get_angle(const servo_t *servo, float *angle) {
-    if (servo == NULL || !servo->initialized) return ERR_INVALID_PARAM;
-    *angle = servo->current_angle;
-    return OK;
-}
+uint16_t servo_pulse_to_count(const servo_t *servo, uint16_t pulse_us);
+uint16_t servo_count_to_pulse(const servo_t *servo, uint16_t count);
+ErrorCode_e servo_get_angle(const servo_t *servo, float *angle);
 
 #endif  // !SERVO_H
