@@ -90,17 +90,22 @@ ErrorCode_e pca9685_init(i2c_inst_t *i2c, uint8_t addr, const PCA9685Config_t *c
     driver.mode1_reg_val = DEFAULT_MODE1;
     driver.initialized = true;
 
-    ErrorCode_e err = pca9685_is_connected();
-    if (err != OK) {
-        driver.initialized = false;
-        return ERR_SENSOR_NOT_CONNECTED;
-    }
 
-    err = pca9685_reset();
+
+    ErrorCode_e err = pca9685_reset();
     if (err != OK) {
         driver.initialized = false;
         return err;
     }
+    
+    // NOTE: is_connected() is not very reliable since the MODE1 register value
+    // changes during operation. This fails when flashing firmware using debug probe for
+    // example.
+    // err = pca9685_is_connected();
+    // if (err != OK) {
+    //     driver.initialized = false;
+    //     return ERR_SENSOR_NOT_CONNECTED;
+    // }
 
     err = pca9685_set_frequency(driver.config->freq);
     if (err != OK) {
