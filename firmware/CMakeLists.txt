@@ -43,6 +43,7 @@ set(SOURCES
     src/drivers/i2c.c
     src/scheduler.c
     src/servo.c
+    src/motion_controller.c
 )
 
 add_executable(firmware src/main.c ${SOURCES})
