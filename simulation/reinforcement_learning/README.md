@@ -37,7 +37,7 @@ In this repo we will explore how we teach botzo to walk
 # Isaac Sim
 
 <p align="center">
-  <img src="https://github.com/IERoboticsAILab/botzo/blob/main/media_assests/botzo_btw_friends.png" width="350"/>
+  <img src="../../docs/assets/botzo_btw_friends.png" width="350"/>
 </p>
 <p align="center"><em>Botzo between the giants & friends</em></p>
 
@@ -53,7 +53,7 @@ Computer specifications:
 
 >_Check system requirements compatibility and satisfaction with [this](https://download.isaacsim.omniverse.nvidia.com/isaac-sim-comp-check%404.5.0-rc.6%2Brelease.675.f1cca148.gl.windows-x86_64.release.zip)_
 
-<img src="https://raw.githubusercontent.com/IERoboticsAILab/botzo/main/media_assests/isaac_compatability_check.png" alt="ours" width="250"/>
+<img src="../../docs/assets/isaac_compatability_check.png" alt="ours" width="250"/>
 
 Download [IsaacSim](https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone%404.5.0-rc.36%2Brelease.19112.f59b3005.gl.windows-x86_64.release.zip) for your OS
 
@@ -87,7 +87,7 @@ And then save it as a USD file. This file is used to import and manipulate your 
 
 `.\python.bat ..\Users\grego\Desktop\GRINGO\botzo\botzo\simulation\reinforcment_learning\standalone_examples\load_botzo_usd.py --usd_path "C:\Users\grego\Desktop\GRINGO\botzo\botzo\simulation\reinforcment_learning\botzo_USD\botzo_USD.usd"`
 
-![result](https://github.com/IERoboticsAILab/botzo/blob/main/media_assests/isaac_sim_botzo.png)
+![result](../../docs/assets/isaac_sim_botzo.png)
 
 <br>
 
@@ -103,7 +103,7 @@ After the installation of Isaac Sim and Isaac Lab, you run examples such as:
 (env_isaaclab) C:\Users\grego\Desktop\GRINGO\IsaacLab\IsaacLab>python scripts\tutorials\03_envs\create_quadruped_base_env.py
 ```
 
-![example](https://github.com/IERoboticsAILab/botzo/blob/main/media_assests/isaaclab.gif)
+![example](../../docs/assets/gifs/isaaclab.gif)
 
 
 ## Create your robot Configuration
@@ -943,7 +943,7 @@ Isaac Lab Documentation [here](https://isaac-sim.github.io/IsaacLab/main/source/
 
 ### Train Jetbot to drive forward
 
-![example](https://github.com/IERoboticsAILab/botzo/blob/main/media_assests/isaac_lab_train_jetbot.gif)
+![example](../../docs/assets/isaac_lab_train_jetbot.gif)
 
 ```shell
 isaaclab.bat --new
@@ -1142,7 +1142,7 @@ def _get_rewards(self) -> torch.Tensor:
 10. Train: `python scripts\reinforcement_learning\skrl\train.py --task=Isaac-Jetbot-Controller-Direct-v0`
 11. Play: `python scripts\reinforcement_learning\skrl\play.py --task=Isaac-Jetbot-Controller-Direct-v0`
 
-![result](https://github.com/IERoboticsAILab/botzo/blob/main/media_assests/jetbot_controller_learn.gif)
+![result](../../docs/assets/jetbot_controller_learn.gif)
 
 </details>
 
