@@ -1,12 +1,12 @@
 # Inverse Kinematics
 
-Inverse Kinematics (IK) is a mathematical approach used in robotics to determine the necessary joint angles to position an end-effector (like a robotic arm or leg) at a specific point in space. This is particularly useful for robots with multiple degrees of freedom (DoF), such as our botzo v2s, which has 3 DoF per leg.
+Inverse Kinematics (IK) is a mathematical approach used in robotics to determine the necessary joint angles to position an end-effector (like a robotic arm or leg) at a specific point in space. This is particularly useful for robots with multiple degrees of freedom (DoF), such as our Botzo v2s, which has 3 DoF per leg.
 
-Inverse Kinematics is used in robots with legs or arms. It is a series of matrix moltiplications and trigonometry formulas (sin, cos,atan2 law of cosin, pitagora, etc...), in order too find the angles each motor in the leg need to have to reach a point in space (x,y,z). Our dog have 3 Degrees of freedom (3DoF), meaning 3 motors per leg.
+Inverse Kinematics is used in robots with legs or arms. It is a series of matrix multiplications and trigonometry formulas (sin, cos,atan2 law of cosin, pitagoras, etc...), in order too find the angles each motor in the leg need to have to reach a point in space (x,y,z). Our dog have 3 Degrees of freedom (3DoF), meaning 3 motors per leg.
 
 _On the other side forward kinematics calculate where the end-effector/the foot end up based on given/known angles of each motor._
 
-Both uses known constants such as lenght of each "bone". For Inverse Kinematic also the target point is a known variable, and it allow us to find the angle configuration we need to reach that point in space.
+Both uses known constants such as length of each "bone". For Inverse Kinematic also the target point is a known variable, and it allow us to find the angle configuration we need to reach that point in space.
 
 ![IK3DOF](../assets/IK_3dof_first_result-ezgif.com-video-to-gif-converter.gif)
 
@@ -98,15 +98,15 @@ Use `IK_solver4Lgs.ipynb`. It is a way to manualy retrive angles for each leg to
 
 1. First the code loads known variables, such as the coefficents retrived from the calibration of each servo (find more [here](https://github.com/IERoboticsAILab/botzo/tree/main/control/inverse_kinematics/servo_calibration)).
 
-and robot dimentions.
+and robot dimensions.
 
-2. We define some usefull function for later (such as translate read to degrees)
+2. We define some useful function for later (such as translate read to degrees)
 
-3. We craete a IK solver for each leg. The only thing that changes is the adjustemts need for each leg servo angle. Because some servos has diffrent orientation therfor diffrent zero.
+3. We create a IK solver for each leg. The only thing that changes is the adjustments need for each leg servo angle. Because some servos has different orientation therefore different zero.
 
-4. Then we manualy define points in the 3D space (x,y,z) inside an array. This points will then later be passed one by one to the IK solvers adn we will return PWM signals for the corrisponding angle that each servo need to have to reach that point.
-  - Each leg has his own IK solver, given the fact that the motors are oriented in diffrent ways.
-  - Differences from Front to Back: Just in the shoulder angle, infact the servo is oriented on the opposite side. So we just do `180° - angle_in_right`
+4. Then we manually define points in the 3D space (x,y,z) inside an array. This points will then later be passed one by one to the IK solvers and we will return PWM signals for the corresponding angle that each servo need to have to reach that point.
+  - Each leg has his own IK solver, given the fact that the motors are oriented in different ways.
+  - Differences from Front to Back: the shoulder angle due to the servo being oriented on the opposite side. So we just do `180° - angle_in_right`
 
   *FR*
 
@@ -138,17 +138,17 @@ and robot dimentions.
     femur_angle = deg2rad(180) - femur_angle
     ```
 
-    2. We have to change the position of the shoulder. The math think that the shoulder is at the right of the leg, but in the right leg, the shoulder servo is at the left to respect to the leg (indide the robot).
+    2. We have to change the position of the shoulder. The math think that the shoulder is at the right of the leg, but in the right leg, the shoulder servo is at the left to respect to the leg (inside the robot).
 
-    We want to achive this:
+    We want to achieve this:
 
     ![IK_full_body_desire](../assets/IK_full_body_desire.png)
 
-    But the math make the robot beleve it is in this configuration (where the leg is duplicated, not mirrored):
+    But the math make the robot believe it is in this configuration (where the leg is duplicated, not mirrored):
 
     ![IK_full_body_math_config](../assets/IK_full_body_math_config.png)
 
-    So the result of IK solver is something like this (not precise, and mooving on a curve rather than a line):
+    So the result of IK solver is something like this (not precise, and moving on a curve rather than a line):
 
     ![IK_full_body_wrongIKresult](../assets/IK_full_body_wrongIKresult.png)
 
@@ -169,7 +169,7 @@ and robot dimentions.
     ```
 
 
-5. We parse the result in a way the we can just copy and paste it in the `test_4legs.ino.ino` arduino code. The arduino code connect to each servo and move them coordinately. So we where able to manualy simulate a Walking Gate. For a more general and sophisticated gate look [here](https://github.com/IERoboticsAILab/botzo/tree/main/control/gait_plan)
+5. We parse the result in a way the we can just copy and paste it in the `test_4legs.ino.ino` Arduino code. The Arduino code connect to each servo and move them coordinately. So we where able to manually simulate a Walking Gate. For a more general and sophisticated gate look [here](https://github.com/IERoboticsAILab/botzo/tree/main/control/gait_plan)
 
 
 ![firststeps](../assets/gifs/firststeps_old_botzo.gif)
