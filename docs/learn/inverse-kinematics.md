@@ -18,27 +18,23 @@ Both uses known constants such as lenght of each "bone". For Inverse Kinematic a
 
 ## 3 DoF IK Of 1 leg
 
-![IK_back_of_leg](../assets/IK_back_of_leg.png)
-
-![IK_side_of_leg](../assets/IK_side_of_leg.png)
+![IK_back_of_leg](../assets/legs_view.png)
 
 ### Solver
 
 Note:
 
 ```
-coxa = A = 3.1 cm
-femur = E = 9.5 cm
-real_femur = E' = 9.1 cm
-tibia = F = 9.8 cm
-θ(coxa) = ψ
-θ(knee) = Φ
-θ(shoulder) = θ
-dist_focuspoint_servo_femurtibia = 2.8 cm
+coxa = A = 2.54 cm
+femur = E = 9.05 cm
+tibia = F = 9.85 cm
 X, Y, Z = given target point
 ```
 
-![IK_trigonometrics_drawing](../assets/IK_trigonometrics_drawing.png)
+![IK_trigonometrics_drawing_back](../assets/IK_trigonometrics_drawing_back.png)
+
+![IK_trigonometrics_drawing_side](../assets/IK_trigonometrics_drawing_side.png)
+
 
 1. Distance Calculation
 
@@ -58,40 +54,38 @@ G = \sqrt{D^2 + X^2}
 \text{Φ} = \arccos\left(\frac{G^2 - \text{E}^2 - \text{F}^2}{-2 \cdot \text{E} \cdot \text{F}}\right)
 ```
 
-4. Shoulder Angle
+4. Femur Angle
 
 ```math
-\theta_{\text{shoulder}} = \arctan2(X, D) + \arcsin\left(\frac{\text{F} \cdot \sin(\text{Φ})}{G}\right)
+\theta = \arctan^2(X, D) + \arcsin\left(\frac{\text{F} \cdot \sin(\text{Φ})}{G}\right)
 ```
 
-5. Coxa Angle
+5. Shoulder Angle
 
 ```math
-\text{ψ} = \arctan2(Y, Z) + \arctan2(D, \text{A})
+\text{ψ} = \arctan^2(Y, Z) + \arctan^2(D, \text{A})
 ```
 
 ### Translator
 
-Here we will translate the founded angles with the translator in the actual angles we will pass to the robot servos
+Here we will translate the founded angles according to our actual servos disposition.
 
-![IK_desire_angles](../assets/IK_desire_angles.png)
+![IK_desire_angles](../assets/angles_transformation.png)
 
-1. Adjustment
+1. Femur Angle Real Robot
 
 ```math
-\text{adjustment} = \arccos\left(\frac{\text{real\_femur}^2 + \text{femur}^2 - \text{dist\_focuspoint\_servo\_femurtibia}^2}{2 \cdot \text{real\_femur} \cdot \text{femur}}\right)
+\text{fremur}_{angle} = 180 - (90 + \theta)
 ```
 
-2. Femur Angle
+2. Kneee Angle Real Robot
 
 ```math
-\theta_{\text{femur}} = \frac{\pi}{2} - (\theta_{\text{shoulder}} + \text{adjustment})
+\text{x} = 180 - (\theta + \text{Φ})
 ```
 
-3. Tibia Angle
-
 ```math
-\theta_{\text{tibia}} = \pi - \theta_{\text{knee}} + \text{adjustment} + \theta_{\text{femur}}
+\text{knee}_{angle} = 90 - \text{x}
 ```
 
 ### Resources
