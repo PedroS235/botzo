@@ -38,33 +38,23 @@ X, Y, Z = given target point
 
 1. Distance Calculation
 
-```math
-D = \sqrt{Z^2 + Y^2 - \text{A}^2}
-```
+$$D = \sqrt{Z^2 + Y^2 - \text{A}^2}$$
 
 2. G Calculation
 
-```math
-G = \sqrt{D^2 + X^2}
-```
+$$G = \sqrt{D^2 + X^2}$$
 
 3. Knee Angle
 
-```math
-\text{Φ} = \arccos\left(\frac{G^2 - \text{E}^2 - \text{F}^2}{-2 \cdot \text{E} \cdot \text{F}}\right)
-```
+$$\text{Φ} = \arccos\left(\frac{G^2 - \text{E}^2 - \text{F}^2}{-2 \cdot \text{E} \cdot \text{F}}\right)$$
 
 4. Femur Angle
 
-```math
-\theta = \arctan^2(X, D) + \arcsin\left(\frac{\text{F} \cdot \sin(\text{Φ})}{G}\right)
-```
+$$\theta = \arctan^2(X, D) + \arcsin\left(\frac{\text{F} \cdot \sin(\text{Φ})}{G}\right)$$
 
 5. Shoulder Angle
 
-```math
-\text{ψ} = \arctan^2(Y, Z) + \arctan^2(D, \text{A})
-```
+$$\text{ψ} = \arctan^2(Y, Z) + \arctan^2(D, \text{A})$$
 
 ### Translator
 
@@ -74,19 +64,13 @@ Here we will translate the founded angles according to our actual servos disposi
 
 1. Femur Angle Real Robot
 
-```math
-\text{fremur}_{angle} = 180 - (90 + \theta)
-```
+$$\text{fremur}_{angle} = 180 - (90 + \theta)$$
 
 2. Kneee Angle Real Robot
 
-```math
-\text{x} = 180 - (\theta + \text{Φ})
-```
+$$\text{x} = 180 - (\theta + \text{Φ})$$
 
-```math
-\text{knee}_{angle} = 90 - \text{x}
-```
+$$\text{knee}_{angle} = 90 - \text{x}$$
 
 ### Resources
 
